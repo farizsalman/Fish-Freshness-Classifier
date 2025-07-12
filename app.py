@@ -2,11 +2,28 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
+import os
+import requests
 
-# Load the trained model
+
+
+MODEL_URL = "https://huggingface.co/datasets/farizsalmant/fish-freshness-model/resolve/main/model.h5"
+MODEL_PATH = "model.h5"
+
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("model.h5")
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading model..."):
+            r = requests.get(MODEL_URL)
+            r.raise_for_status()  # Ensure we notice bad responses
+            with open(MODEL_PATH, "wb") as f:
+                f.write(r.content)
+    model = tf.keras.models.load_model(MODEL_PATH)
+    return model
+# Load the trained model
+#@st.cache_resource
+#def load_model():
+#    return tf.keras.models.load_model("model.h5")
 
 model = load_model()
 
